@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Postman Canary
+Comment=Be the first in line to experience new features!
+GenericName=Postman Canary
+Exec=AppRun %U
+Icon=canary
+Terminal=false
+Categories=Network;
