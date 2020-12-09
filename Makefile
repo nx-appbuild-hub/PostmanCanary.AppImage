@@ -13,28 +13,36 @@ PWD:=$(shell pwd)
 
 
 all: clean
-	mkdir --parents $(PWD)/build
-	mkdir --parents $(PWD)/build/AppDir
-	mkdir --parents $(PWD)/build/AppDir/postman
+	mkdir --parents $(PWD)/build/Boilerplate.AppDir/postman
+	apprepo --destination=$(PWD)/build appdir boilerplate libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0
 
 	wget --output-document=$(PWD)/build/build.tar.gz https://dl.pstmn.io/download/channel/canary/linux_64
 	tar -xvf $(PWD)/build/build.tar.gz -C $(PWD)/build/
 
-	wget --output-document=$(PWD)/build/build.rpm https://ftp.lysator.liu.se/pub/opensuse/distribution/leap/15.2/repo/oss/x86_64/libatk-1_0-0-2.34.1-lp152.1.7.x86_64.rpm
-	cd $(PWD)/build && rpm2cpio $(PWD)/build/build.rpm | cpio -idmv && cd ..
+	echo '' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo 'LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$${APPDIR}/postman' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo 'export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo 'UUC_VALUE=`cat /proc/sys/kernel/unprivileged_userns_clone 2> /dev/null`' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo 'if [ -z "$${UUC_VALUE}" ]' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '    then' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '        exec $${APPDIR}/postman/PostmanCanary --no-sandbox "$${@}"' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '    else' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '        exec $${APPDIR}/postman/PostmanCanary "$${@}"' >> $(PWD)/build/Boilerplate.AppDir/AppRun
+	echo '    fi' >> $(PWD)/build/Boilerplate.AppDir/AppRun
 
-	wget --output-document=$(PWD)/build/build.rpm https://ftp.lysator.liu.se/pub/opensuse/distribution/leap/15.2/repo/oss/x86_64/libatk-bridge-2_0-0-2.34.1-lp152.1.5.x86_64.rpm
-	cd $(PWD)/build && rpm2cpio $(PWD)/build/build.rpm | cpio -idmv && cd ..
 
-	wget --output-document=$(PWD)/build/build.rpm https://ftp.lysator.liu.se/pub/opensuse/distribution/leap/15.2/repo/oss/x86_64/libatspi0-2.34.0-lp152.2.4.x86_64.rpm
-	cd $(PWD)/build && rpm2cpio $(PWD)/build/build.rpm | cpio -idmv && cd ..
-
-	cp --force --recursive $(PWD)/build/usr/* $(PWD)/build/AppDir/
-	cp --force --recursive $(PWD)/build/PostmanCanary/app/* $(PWD)/build/AppDir/postman
-	cp --force --recursive $(PWD)/AppDir/* $(PWD)/build/AppDir
-
-	chmod +x $(PWD)/build/AppDir/AppRun
-	chmod +x $(PWD)/build/AppDir/*.desktop
+	cp --force --recursive $(PWD)/build/Postman*/app/* $(PWD)/build/Boilerplate.AppDir/postman
+	
+	rm --force $(PWD)/build/Boilerplate.AppDir/*.desktop
+	cp --force $(PWD)/AppDir/*.desktop $(PWD)/build/Boilerplate.AppDir/
+	cp --force $(PWD)/AppDir/*.png $(PWD)/build/Boilerplate.AppDir/ || true
+	cp --force $(PWD)/AppDir/*.svg $(PWD)/build/Boilerplate.AppDir/ || true
 
 	export ARCH=x86_64 && $(PWD)/bin/appimagetool.AppImage $(PWD)/build/AppDir $(PWD)/PostmanCanary.AppImage
 	chmod +x $(PWD)/PostmanCanary.AppImage
